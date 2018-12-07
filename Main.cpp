@@ -118,6 +118,24 @@ void findDetails(int perm, Node *p){
   }
 }
 
+Node * search(int perm){
+  bool found = false;
+  if(p == NULL){
+    return;
+  }
+  for(int i=0;i<p->n;i++){
+    if(p->leaf==true){
+      if(perm == p->data[i].user.perm){
+	return p->parent;
+	found = true;
+      }
+    }
+    else if(p->leaf == false){
+      return find(p->children[i]);
+    }
+  }
+}
+
 void insertBTree(int perm, User user, int index){
   int temp;
   tempEntry->user = user;
