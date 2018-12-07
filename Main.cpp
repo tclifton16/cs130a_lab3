@@ -22,11 +22,11 @@ struct Entry{
 };
 
 struct Node{
-  int *keys;
-  Entry *data;
-  Node **children;
-  int n;//number of children
-  int leaf = 0;
+  int k[3];
+  user *usr1, *usr2;
+  Node *c1, *c2, *c3, *c4, *parent;
+  int c;//number of children
+  bool leaf;
 };
 
 Node *root = NULL, *newNode = NULL, *tempNode = NULL;
@@ -35,14 +35,8 @@ Entry tempEntry;
 
 Node * createNewNode(){
   newNode = new Node;
-  newNode->keys = new int[3];
-  newNode->data = new Entry[2];
-  newNode->children = new Node *[4];
   newNode->n=0;
-  newNode->leaf = 1;
-  for(int i=0;i<4;i++){
-    newNode->children[i] = NULL;
-  }
+  newNode->leaf = true;
   return newNode;
 }
 
@@ -76,29 +70,39 @@ void insertion(string fullstr){
 void find(int perm, Node *p){
   bool found = false;
   if(p == NULL){
-    return;
+    return 0;
   }
-  for(int i=0;i<p->n;i++){
-    if(p->leaf==true){
-      if(perm == p->data[i].user.perm){
-	cout << "Perm: " << perm << " exists in B Tree\n";
-	found = true;
-      }
-    }
-    else if(p->leaf == false){
-      find(p->children[i]);
+  if(p->leaf==true){
+    if(perm == p->usr1.perm || perm == p->usr2.perm){
+      cout << "Perm: " << perm << " exists in B Tree\n";
+      found = true;
     }
   }
-  if(found == false){
+  else if(p->leaf == false){
+    find(perm, p->c1);
+    find(perm, p->c2);
+    find(perm, p->c3);
+    find(perm, p->c4);
+  }
+  
+  if(found == false)
     cout << "Perm not found\n");
-  }
 }
+
+
 
 void findDetails(int perm, Node *p){
   bool found = false;
   if(p == NULL){
-    return;
+    return 0;
   }
+  if(p->leaf == true){
+    
+  }
+  else if(p->leaf == false){
+    
+  }
+  
   for(int i=0;i<p->n;i++){
     if(p->leaf==true){
       if(perm == p->data[i].user.perm){
@@ -119,15 +123,13 @@ void findDetails(int perm, Node *p){
 }
 
 Node * search(int perm){
-  bool found = false;
   if(p == NULL){
     return;
   }
   for(int i=0;i<p->n;i++){
     if(p->leaf==true){
-      if(perm == p->data[i].user.perm){
+      if(perm == p->usr1->perm || perm == p->usr2->perm){
 	return p->parent;
-	found = true;
       }
     }
     else if(p->leaf == false){
