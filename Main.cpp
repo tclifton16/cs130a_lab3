@@ -36,6 +36,7 @@ Node * search(int perm);
 void insertBTree(User *x);
 bool isFull(Node *n);
 void split(Node *n);
+int getMin(Node *n);
 
 
 Node *root = NULL, *newNode = NULL, *tempNode = NULL;
@@ -139,6 +140,18 @@ void findDetails(int perm, Node *p){
 	if(found == false){
 		cout << "Perm not found\n";
 	}
+}
+
+int getMin(Node *n){
+  if(n == NULL){
+    return -1;
+  }
+  if(n->leaf){
+    return n->usr1->perm;
+  }
+  else{
+    return getMin(n->c1);
+  }
 }
 
 Node * search(int perm){
