@@ -37,11 +37,14 @@ void insertBTree(User *x);
 bool isFull(Node *n);
 void split(Node *n);
 int getMin(Node *n);
-
+void recommend(int perm);
+void dfs(int perm, string one, string two);
+void dfsutil(int p, bool *visited);
 
 Node *root = NULL, *newNode = NULL, *tempNode = NULL;
 vector<vector<int> > graph;
 Entry tempEntry;
+bool found = false;
 
 Node * createNewNode(){
 	newNode = new Node;
@@ -60,7 +63,59 @@ Node * createNewNode(){
 	return newNode;
 }
 
+void recommend(int perm){
+  string one, two;
+  Node *temp = search(perm, root);
+  if(temp != NULL){
+    if(perm < temp->k[0]){
+      temp = temp->c1;
+    }
+    else if(perm >= temp->k[0] && perm < temp->k[1]){
+      temp = temp->c2;
+    }
+    else if(perm >= temp->k[1] && perm < temp->k[2]){
+      temp = temp->c3;
+    }
+    else{
+      temp = temp->c4;
+    }
+    if(temp->usr1->perm == perm){
+      one = temp->usr1->genre1;
+      two = temp->usr1->genre2;
+    }
+    else if(temp->usr2->perm == perm){
+      one = temp->usr2->genre1;
+      two = temp->usr2->genre2;
+    }
+    dfsutil(graph.size(),visited);
+  }
+}
 
+void dfs(int perm, string one, string two){
+  bool *visited = new bool[graph.size()];
+  for(int i = 0; i < graph.size(); i++){
+    visited[i] = false;
+  }
+  dfsutil(graph.size(),visited);
+}
+
+void dfsutil(int p, bool *visited){
+  visited[p] = true;
+  for(int i = 0; i < p; i++){
+    if(!visited[i]){
+      dfsutil(i,visited);
+    }
+  }
+}
+
+User dfshelper(int perm, Node *leafNode){
+  if(leafNode->usr1->perm == perm){
+    return leafNode->usr1;
+  }
+  else if(leafNode->usr1->perm == perm){
+    return leafNode->usr1;
+  }
+}
 
 void insertion(string fullstr){
 	User *user = new User;
@@ -95,11 +150,10 @@ void insertion(string fullstr){
 }
 
 void find(int perm, Node *p){
-	bool found = false;
 	if(p != NULL){
 	  
 	  if(p->leaf==true){
-	    if(perm == p->usr1->perm || perm == p->usr2->perm){
+	    if(perm == p->usr1->perm || p->usr2 != NULL && perm == p->usr2->perm){
 	      cout << "Perm: " << perm << " exists in B Tree\n";
 	      found = true;
 	    }
@@ -110,16 +164,11 @@ void find(int perm, Node *p){
 	    find(perm, p->c3);
 	    find(perm, p->c4);
 	  }
-	  
-	  if(found == false)
-	    cout << "Perm not found\n";
-	}
 }
 
 
 
 void findDetails(int perm, Node *p){
-  bool found = false;
   if(p != NULL){
     if(p->leaf == true){
       if(perm == p->usr1->perm){
@@ -134,7 +183,7 @@ void findDetails(int perm, Node *p){
 	}
 	cout << endl;
       }
-      else if(perm == p->usr2->perm){
+      else if(p->usr2 != NULL && perm == p->usr2->perm){
 	cout << "Perm: " << p->usr2->perm << " Name: " << p->usr2->name << "Genre1: " << p->usr2->genre1 << " Genre2: " << p->usr2->genre2 << "Friends:";
 	found = true;
 	for(int i = 0;i < graph.size(); i++){
@@ -153,9 +202,6 @@ void findDetails(int perm, Node *p){
       findDetails(perm,p->c3);
       findDetails(perm,p->c4);
     }
-  }
-  if(found == false){
-    cout << "Perm not found\n";
   }
 }
 
@@ -600,13 +646,13 @@ int main(){
 
 	cout << "Welcome!\n";
 	while(!q){
-		cout << "What operation would you like to perform?\n\t1: Input from file\n\t2: Add user\n\t3: Find user\n\t4: Find user's details\n\t5: Recommend friends\n\t6: Quit";
+		cout << "What operation would you like to perform?\n\t1: Input from file\n\t2: Add user\n\t3: Find user\n\t4: Find user's details\n\t5: Recommend friends\n\t6: Quit\n\tOption (1,2,3,4,5,6): ";
 		if(cin >> input){
 			switch (input){
 				case 1:
 					{
 					//input from file
-					cout << "Please enter filname: ";
+					cout << "Please enter filename: ";
 					cin >> name;
 					ifstream infile(name);
 					while(getline(infile, name)){
@@ -641,6 +687,7 @@ int main(){
 							fullstr+=";";
 						}
 					}while(name != "stop");
+					insertion(fullstr);
 					break;
 					}
 				case 3:
@@ -649,6 +696,9 @@ int main(){
 					cout << "Enter the perm number you would like to find: ";
 					cin >> perm;
 					find(perm,root);
+					if(!found){
+					  cout << "Perm not found\n";
+					}
 					break;
 					}
 				case 4:
