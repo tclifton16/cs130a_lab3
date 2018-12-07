@@ -60,6 +60,8 @@ Node * createNewNode(){
 	return newNode;
 }
 
+
+
 void insertion(string fullstr){
 	User *user;
 	int index,numFriends,count=4;
