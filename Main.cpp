@@ -32,7 +32,7 @@ Node * createNewNode();
 void insertion(string fullstr);
 void find(int perm, Node *p);
 void findDetails(int perm, Node *p);
-Node * search(int perm);
+Node * search(int perm, Node *p);
 void insertBTree(User *x);
 bool isFull(Node *n);
 void split(Node *n);
@@ -89,57 +89,67 @@ void insertion(string fullstr){
 
 void find(int perm, Node *p){
 	bool found = false;
-	if(p == NULL){
-		return;
+	if(p != NULL){
+	  
+	  if(p->leaf==true){
+	    if(perm == p->usr1->perm || perm == p->usr2->perm){
+	      cout << "Perm: " << perm << " exists in B Tree\n";
+	      found = true;
+	    }
+	  }
+	  else if(p->leaf == false){
+	    find(perm, p->c1);
+	    find(perm, p->c2);
+	    find(perm, p->c3);
+	    find(perm, p->c4);
+	  }
+	  
+	  if(found == false)
+	    cout << "Perm not found\n";
 	}
-	if(p->leaf==true){
-		if(perm == p->usr1->perm || perm == p->usr2->perm){
-			cout << "Perm: " << perm << " exists in B Tree\n";
-			found = true;
-		}
-	}
-	else if(p->leaf == false){
-		find(perm, p->c1);
-		find(perm, p->c2);
-		find(perm, p->c3);
-		find(perm, p->c4);
-	}
-
-	if(found == false)
-		cout << "Perm not found\n";
 }
 
 
 
 void findDetails(int perm, Node *p){
-	bool found = false;
-	if(p == NULL){
-		return;
+  bool found = false;
+  if(p != NULL){
+    if(p->leaf == true){
+      if(perm == p->usr1->perm){
+	cout << "Perm: " << p->usr1->perm << " Name: " << p->usr1->name << "Genre1: " << p->usr1->genre1 << " Genre2: " << p->usr1->genre2 << "Friends: ";
+	found = true;
+	for(int i = 0;i < graph.size(); i++){
+	  if(graph[i][0]==perm){
+	    for(int x = 1; x < graph[i].size(); x++){
+	      cout << " " << graph[i][x];
+	    }
+	  }
 	}
-	if(p->leaf == true){
-
+	cout << endl;
+      }
+      else if(perm == p->usr2->perm){
+	cout << "Perm: " << p->usr2->perm << " Name: " << p->usr2->name << "Genre1: " << p->usr2->genre1 << " Genre2: " << p->usr2->genre2 << "Friends:";
+	found = true;
+	for(int i = 0;i < graph.size(); i++){
+	  if(graph[i][0]==perm){
+	    for(int x = 1; x < graph[i].size(); x++){
+	      cout << " " << graph[i][x];
+	    }
+	  }
 	}
-	else if(p->leaf == false){
-
-	}
-
-	for(int i=0;i<p->c;i++){
-		if(p->leaf==true){
-			if(perm == p->data[i].user.perm){
-				cout << "Perm: " << perm << " Name: " << p->data[i].user.name << " Genre1: " << p->data[i].user.perm << " Genre2: " << p->data[i].user.perm << " Friends perm:";
-				for(int x = 0; x < graph[p->data[i].index].size(); x++){
-					cout << " " << graph[p->data[i].index][x];
-				}
-				cout << endl;
-			}
-		}
-		else if(p->leaf == false){
-			find(p->children[i]);
-		}
-	}
-	if(found == false){
-		cout << "Perm not found\n";
-	}
+	cout << endl;
+      }
+    }
+    else if(p->leaf == false){
+      findDetails(perm,p->c1);
+      findDetails(perm,p->c2);
+      findDetails(perm,p->c3);
+      findDetails(perm,p->c4);
+    }
+  }
+  if(found == false){
+    cout << "Perm not found\n";
+  }
 }
 
 int getMin(Node *n){
@@ -154,25 +164,33 @@ int getMin(Node *n){
   }
 }
 
-Node * search(int perm){
+Node * search(int perm, Node *p){
 	if(p == NULL){
-		return;
+	  return NULL;
 	}
-	for(int i=0;i<p->n;i++){
-		if(p->leaf==true){
-			if(perm == p->usr1->perm || perm == p->usr2->perm){
-				return p->parent;
-			}
-		}
-		else if(p->leaf == false){
-			return find(p->children[i]);
-		}
+	if(p->leaf==true){
+	  return p->parent;
 	}
+	else if(p->leaf == false){
+	  if(perm < p->k[0]){
+	    return search(perm, p->c1);
+	  }
+	  else if(perm >= p->k[0] && perm < p->k[1]){
+	    return search(perm, p->c2);
+	  }
+	  else if(perm >= p->k[1] && perm < p->k[2]){
+	    return search(perm, p->c3);
+	  }
+	  else{
+	    return search(perm, p->c4);
+	  }
+	}
+	return NULL;
 }
 
 void insertBTree(User *x)
 {
-	Node *temp = search(x->perm);
+  Node *temp = search(x->perm, root);
 	if(isFull(temp))
 	{
 		split(temp);
