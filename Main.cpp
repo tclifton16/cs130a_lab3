@@ -40,6 +40,7 @@ int getMin(Node *n);
 void recommend(int perm);
 void dfs(int perm, string one, string two);
 void dfsutil(int p, bool *visited);
+vector<int> dfshelper(int perm, Node *leafNode, bool *visited);
 
 Node *root = NULL, *newNode = NULL, *tempNode = NULL;
 vector<vector<int> > graph;
@@ -87,7 +88,7 @@ void recommend(int perm){
       one = temp->usr2->genre1;
       two = temp->usr2->genre2;
     }
-    dfsutil(graph.size(),visited);
+    dfs(perm,one,two);
   }
 }
 
@@ -101,20 +102,40 @@ void dfs(int perm, string one, string two){
 
 void dfsutil(int p, bool *visited){
   visited[p] = true;
+  vector<int> temp = dfshelper(p,root,visited);
   for(int i = 0; i < p; i++){
     if(!visited[i]){
       dfsutil(i,visited);
+      vector<int> temp = dfshelper(p,root,visited);
+    }
+  }
+  for(int i = 0; i < temp.size(); i++){
+    for(int x = 0; x < graph[p].size();x++){
+      if(temp[i] != graph[p][x]){
+	cout << "Perms of recommended friends: ";
+	cout << temp[i];
+      }
     }
   }
 }
 
-User dfshelper(int perm, Node *leafNode){
+vector<int> dfshelper(int perm, Node *leafNode, bool *visited){
+  vector<int> temp;
   if(leafNode->usr1->perm == perm){
-    return leafNode->usr1;
+    for(int i = 0; i < graph[perm].size(); i++){
+      find(perm, leafNode);
+      temp.push_back(graph[perm][i]);
+    }
+    return temp;
   }
-  else if(leafNode->usr1->perm == perm){
-    return leafNode->usr1;
+  else if(leafNode->usr2->perm == perm){
+    for(int i = 0; i < graph[perm].size();i++){
+      find(perm,leafNode);
+      temp.push_back(graph[perm][i]);
+    }
+    return temp;
   }
+  return temp;
 }
 
 void insertion(string fullstr){
@@ -141,6 +162,7 @@ void insertion(string fullstr){
 	user->genre2=vec[3];
 
 	index = graph.size();
+	numvec.push_back(tempb);
 	while(count < vec.size()){
 		numvec.push_back(stoi(vec[count]));
 		count ++;
@@ -164,6 +186,7 @@ void find(int perm, Node *p){
 	    find(perm, p->c3);
 	    find(perm, p->c4);
 	  }
+	}
 }
 
 
@@ -712,7 +735,9 @@ int main(){
 				case 5:
 					{
 					//recommend
-
+					  cout<<"Enter the perm for recommendations: ";
+					  cin>>perm;
+					  recommend(perm);
 					break;
 					}
 				case 6:
