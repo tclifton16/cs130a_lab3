@@ -48,7 +48,7 @@ Node * createNewNode(){
 	newNode->c=0;
 	newNode->leaf = true;
 	for(int i=0; i<3; i++)
-		newNode->k[i] = -1;
+		newNode->k[i] = 10000;
 	newNode->usr1 = NULL;
 	newNode->usr2 = NULL;
 	newNode->c1 = NULL;
@@ -61,7 +61,9 @@ Node * createNewNode(){
 }
 
 void insertion(string fullstr){
-	User *user;
+	User *user = new User;
+	
+
 	int index,numFriends,count=4;
 	string temp;
 	vector<string> vec;
@@ -74,7 +76,9 @@ void insertion(string fullstr){
 		vec.push_back(substr);
 	}
 
-	user->perm=stoi(vec[0]);
+	string tempa = vec[0];
+	int tempb = stoi(tempa);
+	user->perm = tempb;
 	user->name=vec[1];
 	user->genre1=vec[2];
 	user->genre2=vec[3];
@@ -82,6 +86,7 @@ void insertion(string fullstr){
 	index = graph.size();
 	while(count < vec.size()){
 		numvec.push_back(stoi(vec[count]));
+		count ++;
 	}
 	graph.push_back(numvec);
 	insertBTree(user);
@@ -154,7 +159,7 @@ void findDetails(int perm, Node *p){
 
 int getMin(Node *n){
   if(n == NULL){
-    return -1;
+    return 10000;
   }
   if(n->leaf){
     return n->usr1->perm;
@@ -168,8 +173,12 @@ Node * search(int perm, Node *p){
 	if(p == NULL){
 	  return NULL;
 	}
-	if(p->leaf==true){
+	if(p->leaf==true && p->parent != NULL){
 	  return p->parent;
+	}
+	if (p->leaf == true)
+	 {
+		 return root;
 	}
 	else if(p->leaf == false){
 	  if(perm < p->k[0]){
@@ -185,7 +194,7 @@ Node * search(int perm, Node *p){
 	    return search(perm, p->c4);
 	  }
 	}
-	return NULL;
+	
 }
 
 void insertBTree(User *x)
@@ -196,21 +205,17 @@ void insertBTree(User *x)
 		split(temp);
 		insertBTree(x);
 	}
-	if(temp->c4 != NULL)
-	{
-		split(temp);
-		insertBTree(x);
-	}
 	if(root == NULL)//x is first user entered
-	{
-		Node *t = createNewNode();
-		t->usr1 = x;
-		root = t;
-		
+         {
+                 Node *t = createNewNode();
+                 t->usr1 = x;
+                 root = t;
 
 
-		return;
-	}
+
+                 return;
+         }
+
 	if(root->leaf)
 	{
 		if(root->usr2 == NULL)
@@ -242,8 +247,8 @@ void insertBTree(User *x)
 				root = t2;
 
 				t2->k[0] = getMin(t2->c2);
-				t2->k[1] = -1;
-				t2->k[2] = -1;
+				t2->k[1] = 10000;
+				t2->k[2] = 10000;
 			
 				return;
 			}
@@ -257,8 +262,8 @@ void insertBTree(User *x)
 				root = t2;
 
 				t2->k[0] = x->perm;
-				t2->k[1] = -1;
-				t2->k[2] = -1;
+				t2->k[1] = 10000;
+				t2->k[2] = 10000;
 
 				return;
 			}
@@ -273,18 +278,25 @@ void insertBTree(User *x)
 				root = t2;
 
 				t2->k[0] = t3->usr1->perm;
-				t2->k[1] = -1;
-				t2->k[2] = -1;
+				t2->k[1] = 10000;
+				t2->k[2] = 10000;
 				
 				return;
 			}
 		}
 	}
-	else//if root is not a leaf
+	else
+{
+	if(temp->leaf)
 	{
-		if(x->perm < temp->k[0])//x belongs in leaf no1
+		temp->c1 = temp;
+		temp->c2 = temp;
+		temp->c3 = temp;
+		temp->c4 = temp;
+	}
+		if(x->perm < temp->c1->k[0])//x belongs in leaf no1
 		{
-			if(temp->c1->usr2 == NULL)//leafno1 has space
+			if(temp->usr2 == NULL)//leafno1 has space
 			{
 				if(x->perm <temp->c1->usr1->perm)
 				{
@@ -443,14 +455,16 @@ void insertBTree(User *x)
 		}	
 		else 
 		{
-			temp->c4->usr1 = x;
-			temp->k[2] = getMin(temp->c4);
+			split(temp);
+			insertBTree(x);
 		}
 	}
 }
 
 bool isFull(Node * n)
 {
+	if(n == NULL)
+		return false;
 	if(n->leaf)
 	{
 		if(n->usr2 == NULL)
@@ -476,7 +490,7 @@ void split(Node * n)
 	a->c2 = n->c4;
 	n->c3 = NULL;
 	n->c4 = NULL;
-	if(n->parent = NULL)//is root
+	if(n->parent == NULL)//is root
 	{
 		Node *c = createNewNode();
 		c->leaf = false;
@@ -488,28 +502,28 @@ void split(Node * n)
 		c->c2 = a;
 
 		a->k[0] = getMin(a->c2);
-		a->k[1] = -1;
-		a->k[2] = -1;
+		a->k[1] = 10000;
+		a->k[2] = 10000;
 
 		n->k[0] = getMin(n->c2);
-		n->k[1] = -1;
-		n->k[2] = -1;
+		n->k[1] = 10000;
+		n->k[2] = 10000;
 
 		c->k[0] = getMin(c->c2);
-		c->k[1] = -1;
-		c->k[2] = -1;
+		c->k[1] = 10000;
+		c->k[2] = 10000;
 
 		return;
 	}
 	Node *b = n->parent;
 	a->k[0] = getMin(a->c2);
 
-	a->k[1] = -1;
-	a->k[2] = -1;
+	a->k[1] = 10000;
+	a->k[2] = 10000;
 
 	n->k[0] = getMin(n->c2);
-	n->k[1] = -1;
-	n->k[2] = -1;
+	n->k[1] = 10000;
+	n->k[2] = 10000;
 
 	if(b->c1 == n)//N is first child of its parent
 	{
