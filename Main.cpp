@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include <vector>
+#include <fstream>
 
 #include "User.h"
 
@@ -13,33 +14,36 @@ struct User{
   string name;
   string genre1;
   string genre2;
-}
+};
 
 struct Entry{
   int index;
   User user;
-}
-
-struct Node{
-  Entry *data;
-  Node **children;
-  bool leaf;
-  int n;
-  int degree;
 };
 
-Node *root = NULL, *np = NULL, *x = NULL;
+struct Node{
+  int *keys;
+  Entry *data;
+  Node **children;
+  int n;//number of children
+  int leaf = 0;
+};
+
+Node *root = NULL, *newNode = NULL, *tempNode = NULL;
+vector<vector<int> > graph;
+Entry tempEntry;
 
 Node * createNewNode(){
-  tempNode = new Node;
-  tempNode->data = new Entry[3];
-  tempNode->children = new Node *[4];
-  tempNode->isLeaf = true;
-  tempNode->degree = 0;
+  newNode = new Node;
+  newNode->keys = new int[3];
+  newNode->data = new Entry[2];
+  newNode->children = new Node *[4];
+  newNode->n=0;
+  newNode->leaf = 1;
   for(int i=0;i<4;i++){
-    tempNode->children[i] = NULL;
+    newNode->children[i] = NULL;
   }
-  return tempNode;
+  return newNode;
 }
 
 void insertion(string fullstr){
@@ -69,18 +73,105 @@ void insertion(string fullstr){
   insertBTree(user.perm, user, index);
 }
 
+void find(int perm, Node *p){
+  bool found = false;
+  if(p == NULL){
+    return;
+  }
+  for(int i=0;i<p->n;i++){
+    if(p->leaf==true){
+      if(perm == p->data[i].user.perm){
+	cout << "Perm: " << perm << " exists in B Tree\n";
+	found = true;
+      }
+    }
+    else if(p->leaf == false){
+      find(p->children[i]);
+    }
+  }
+  if(found == false){
+    cout << "Perm not found\n");
+  }
+}
+
+void findDetails(int perm, Node *p){
+  bool found = false;
+  if(p == NULL){
+    return;
+  }
+  for(int i=0;i<p->n;i++){
+    if(p->leaf==true){
+      if(perm == p->data[i].user.perm){
+        cout << "Perm: " << perm << " Name: " << p->data[i].user.name << " Genre1: " << p->data[i].user.perm << " Genre2: " << p->data[i].user.perm << " Friends perm:";
+	for(int x = 0; x < graph[p->data[i].index].size(); x++){
+	  cout << " " << graph[p->data[i].index][x];
+	}
+	cout << endl;
+      }
+    }
+    else if(p->leaf == false){
+      find(p->children[i]);
+    }
+  }
+  if(found == false){
+    cout << "Perm not found\n";
+  }
+}
+
 void insertBTree(int perm, User user, int index){
-  
+  int temp;
+  tempEntry->user = user;
+  tempEntry->index = index;
+  tempNode = root;
+  if(tempNode == NULL){
+    root = createNewNode();
+    tempNode = root;
+  }
+  else{
+    //if tempNode is leaf & full
+    if(tempNode->leaf == 1 && tempNode->n == 2){
+      split_leaf(tempNode);
+      tempNode = root;
+      for(int i=0; i<tempNode->n; i++){
+        temp = split_child(tempNode);
+	tempNode = root;
+      }
+    }
+    else{
+      while(tempNode->leaf != 1){
+	for(int i=0;i<tempNode->n;i++){
+	  if((perm > tempNode->keys[i])&&(perm < tempNode->keys[i+1])){
+	    i++;
+	    break;
+	  }
+	  else if(perm < tempNode->keys[0]){
+	    break;
+	  }
+	  else{
+	    continue;
+	  }
+	}
+	if((tempNode->children[i])->n==3){
+	  temp = split_child(tempNode);
+	  tempNode->keys[tempNode->n] = temp;
+	  tempNode->n++;
+	  continue;
+	}
+	else{
+	  tempNode = tempNode->children[i];
+	}
+      }
+    }
+  }
 }
 
 int main(){
-  vector<vector<int> > graph;
   bool q = false;
   int input;
+  int perm;
   string *parsestr;
   string name;
-
-  BTree tree;
+  string fullstr = "";
 
   cout << "Welcome!\n";
   while(!q){
@@ -91,19 +182,53 @@ int main(){
 	//input from file
 	cout << "Please enter filname: ";
 	cin >> name;
+	ifstream infile(name);
+	while(getline(infile, name)){
+	  insertion(name);
+	}
 	break;
       case 2:
 	//add user
-	
+	cout << "Enter perm: ";
+	cin >> perm;
+	fullstr += perm;
+	fullstr += ";"
+	cout << "Enter name: ";
+	cin >> name;
+	fullstr += name;
+	fullstr += ";";
+	cout << "Enter genre 1: ";
+	cin >> name;
+	fullstr += name;
+	fullstr += ";";
+	cout << "Enter genre 2: ";
+	cin >> name;
+	fullstr += name;
+	fullstr += ";";
+	do{
+	  cout << "Enter friend perm (stop to stop): ";
+	  cin >> name;
+	  if(name!="stop"){
+	    fullstr+=name;
+	    fullstr+=";";
+	  }
+	}while(name != "stop");
 	break;
       case 3:
 	//find user
+	cout << "Enter the perm number you would like to find: ";
+	cin >> perm;
+	find(perm,root);
 	break;
       case 4:
 	//find details
+	cout << "Enter the perm number you would like to find: ";
+	cin >> perm;
+	findDetails(perm,root);
 	break;
       case 5:
 	//recommend
+	
 	break;
       case 6:
 	q = true;
