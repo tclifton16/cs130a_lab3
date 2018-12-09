@@ -264,7 +264,7 @@ void findDetails(int perm, Node *p){
 				 if(graph[i][0] == perm)
 				 {
 					 for( int j=1; j<graph[i].size(); j++)
-						 cout<<"\n"<<graph[i][j];
+						 cout<<graph[i][j]<<"\n";
 				}
 			 }
                          found = true;
@@ -273,13 +273,13 @@ void findDetails(int perm, Node *p){
                  else if(p->usr2 != NULL && p->usr2-> perm == perm)
                  {
                          cout<<"User found!"<<endl;
-			  cout<<"Perm Number: "<<perm<<"\nUser Name: "<<p->usr2->name<<"\nGenre 1: "<<p->usr2->genre1<<"\nGenre 2: "<<p->usr2->genre2<<"\nPerm Numbers of Friends:\n";
+			 cout<<"Perm Number: "<<perm<<"\nUser Name: "<<p->usr2->name<<"\nGenre 1: "<<p->usr2->genre1<<"\nGenre 2: "<<p->usr2->genre2<<"\nPerm Numbers of Friends:\n";
                           for(int i = 0; i<graph.size(); i++)
                           {
                                   if(graph[i][0] == perm)
                                   {
                                           for( int j=1; j<graph[i].size(); j++)
-                                                  cout<<"\n"<<graph[i][j];
+                                                  cout<<graph[i][j]<<endl;
                                   }
                           }
 
@@ -287,33 +287,34 @@ void findDetails(int perm, Node *p){
                          return;
 		 }
                  else
+			 found = false;
                          return;
 
          }
          if(perm < p->k[0])
-                 find(perm, p->c1);
+                 findDetails(perm, p->c1);
 
          if(perm >= p->k[0])
          {
                  if(p->k[1] > 9999)
-                         find(perm, p->c2);
+                         findDetails(perm, p->c2);
 
                  else
                  {
                          if(perm < p->k[1])
-                                 find (perm, p->c2);
+                                 findDetails(perm, p->c2);
 
                          if(perm >= p->k[1])
                          {
                                  if(p->k[2] > 9999)
-                                         find(perm, p->c3);
+                                         findDetails(perm, p->c3);
 
                                  else
                                  {
                                          if(perm < p->k[2])
-                                                 find(perm, p->c3);
+                                                 findDetails(perm, p->c3);
                                          else
-                                                 find(perm, p->c4);
+                                                 findDetails(perm, p->c4);
                                  }
                          }
                  }
@@ -831,6 +832,8 @@ int main(){
 					cout << "Enter the perm number you would like to find: ";
 					cin >> perm;
 					findDetails(perm,root);
+					if(!found)
+						cout<<"Perm not found\n";
 					break;
 					}
 				case 5:
