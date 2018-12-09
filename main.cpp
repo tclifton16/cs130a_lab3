@@ -43,7 +43,6 @@ void dfsutil(int p, bool *visited);
 vector<int> dfshelper(int perm, Node *leafNode, bool *visited);
 
 Node *root = NULL, *newNode = NULL, *tempNode = NULL;
-int graphSize = 0;
 vector<vector<int> > graph;
 Entry tempEntry;
 bool found = false;
@@ -161,9 +160,6 @@ void insertion(string fullstr){
 	user->name=vec[1];
 	user->genre1=vec[2];
 	user->genre2=vec[3];
-
-	cout<<graph.size()<<"THis is graph size"<<endl;
-	cout<<vec.size()<<"this is vec size"<<endl;
 
 	index = graph.size();
 	numvec.push_back(tempb);
@@ -336,15 +332,19 @@ int getMin(Node *n){
 }
 
 Node * search(int perm, Node *p){
+
 	if(p == NULL){
 	  return NULL;
 	}
 	if(p->leaf==true && p->parent != NULL){
-	  return p->parent;
+		if(p->usr1->perm == perm || (p->usr2 != NULL && p->usr2->perm == perm){
+			 return p->parent;
+		}
 	}
 	if (p->leaf == true)
-	 {
-		 return root;
+	{
+		if(p->usr1->perm == perm || (p->usr2 != NULL && p->usr2->perm == perm)
+			return root;
 	}
 	else if(p->leaf == false){
 	  if(perm < p->k[0]){
@@ -365,266 +365,19 @@ Node * search(int perm, Node *p){
 
 void insertBTree(User *x)
 {
-  Node *temp = search(x->perm, root);
-	if(isFull(temp))
+	if (root == NULL)//first insert
 	{
-		split(temp);
-		insertBTree(x);
+		Node *t = createNewNode();
+		t->usr1 = x;
+		t->c =1;
+		root = t;
+		return;
 	}
-	if(root == NULL)//x is first user entered
-         {
-                 Node *t = createNewNode();
-                 t->usr1 = x;
-                 root = t;
+
+	Node *temp = search(x->perm, root);
 
 
-
-                 return;
-         }
-
-	if(root->leaf)
-	{
-		if(root->usr2 == NULL)
-		{
-			if(x->perm > root->usr1->perm)
-			{
-				root->usr2 = x;
-			}
-			else
-			{
-				root->usr2 = root->usr1;
-				root->usr1 = x;
-			}
-		}
-		else
-		{
-			Node *t2 = createNewNode();
-			t2->leaf = false;
-			t2->c = 2;
-			Node *t3 = createNewNode();
-
-			if(x->perm < root->usr1->perm)
-			{
-				t3->usr1 = x;
-				t3->parent = t2;
-				t2->c1 = t3;
-				root->parent = t2;
-				t2->c2 = root;
-				root = t2;
-
-				t2->k[0] = getMin(t2->c2);
-				t2->k[1] = 10000;
-				t2->k[2] = 10000;
-			
-				return;
-			}
-			if(x->perm > root->usr2->perm)
-			{
-				t3->usr1 = x;
-				t3->parent = t2;
-				root->parent = t2;
-				t2->c1 = root;
-				t2->c2 = t3;
-				root = t2;
-
-				t2->k[0] = x->perm;
-				t2->k[1] = 10000;
-				t2->k[2] = 10000;
-
-				return;
-			}
-			else
-			{
-				t3->usr1 = root->usr2;
-				root->usr2 = x;
-				t3->parent = t2;
-				root->parent = t2;
-				t2->c1 = root;
-				t2->c2 = t3;
-				root = t2;
-
-				t2->k[0] = t3->usr1->perm;
-				t2->k[1] = 10000;
-				t2->k[2] = 10000;
-				
-				return;
-			}
-		}
-	}
-	else
-{
-	if(temp->leaf)
-	{
-		temp->c1 = temp;
-		temp->c2 = temp;
-		temp->c3 = temp;
-		temp->c4 = temp;
-	}
-		if(x->perm < temp->c1->k[0])//x belongs in leaf no1
-		{
-			if(temp->usr2 == NULL)//leafno1 has space
-			{
-				if(x->perm <temp->c1->usr1->perm)
-				{
-					temp->c1->usr2 = temp->c1->usr1;
-					temp->c1->usr1 = x;
-					return;
-				}
-				else
-				{
-					temp->c1->usr2 = x;
-					return;
-				}
-			}
-			else//leafno1 has no space
-			{
-				if(x->perm < temp->c1->usr1->perm)//perm<A
-				{
-					Node *r = createNewNode();
-					r->usr1 = x;
-					r->parent = temp;
-					temp->c ++;
-					temp->c4 = temp->c3;
-					temp->c3 = temp->c2;
-					temp->c2 = temp->c1;
-					temp->c1 = r;
-
-				}
-				else if(x->perm > temp->c1->usr2->perm)//Perm>B
-				{
-					Node *r = createNewNode();
-					r->usr1 = x;
-					r->parent = temp;
-					temp->c ++;
-					temp->c4 = temp->c3;
-					temp->c3 = temp->c2;
-					temp->c2 = r;
-				}
-				else
-				{
-					Node *r = createNewNode();
-					r->usr1 = temp->c1->usr2;
-					temp->c1->usr2 = x;
-					r->parent = temp;
-					temp->c++;
-					temp->c4 = temp->c3;
-					temp->c3 = temp->c2;
-					temp->c2 = r;
-				}
-
-				temp->k[0] = getMin(temp->c2);
-				temp->k[1] = getMin(temp->c3);
-				temp->k[2] = getMin(temp->c4);
-
-				return;
-			}
-		}
-		else if(x->perm < temp->k[1])//x belongs in leafno2
-		{
-			if(temp->c2->usr2 == NULL)//if leafno2 has space
-			{
-				if(x->perm < temp->c2->usr1->perm)
-				{
-					temp->c2->usr2 = temp->c2->usr1;
-					temp->c2->usr1 = x;
-					temp->k[0] = x->perm;
-				}
-				else
-					temp->c2->usr2 = x;
-			}
-			else//leaf no space
-			{
-				if(x->perm < temp->c2->usr1->perm)
-				{
-					Node *r = createNewNode();
-					r->usr1 = x;
-					r->parent = temp;
-					temp->c++;
-					temp->c4 = temp->c3;
-					temp->c3 = temp->c2;
-					temp->c2 = r;
-				}
-				else if(x->perm > temp->c2->usr2->perm)
-				{
-					Node *r = createNewNode();
-					r->usr1 = x;
-					r->parent = temp;
-					temp->c++;
-					temp->c4 = temp->c3;
-					temp->c3 = r;
-				}
-				else
-				{
-					Node *r = createNewNode();
-					r->usr1 = temp->c2->usr2;
-					temp->c2->usr2 =x;
-					r->parent = temp;
-					temp->c ++;
-					temp->c4 = temp->c3;
-					temp->c3 = r;
-				}
-				temp->k[0] = getMin(temp->c2);
-				temp->k[1] = getMin(temp->c3);
-				temp->k[2] = getMin(temp->c4);
-
-				return;
-			}
-		}
-		else if(x->perm < temp->k[2])//x belongs in leafno3
-		{
-			if(temp->c3->usr2 == NULL)
-			{
-				if(x->perm < temp->c3->usr1->perm)
-				{
-					temp->c3->usr2 = temp->c3->usr1;
-					temp->c3->usr1 = x;
-					temp->k[1] = x->perm;
-				}
-				else
-				{
-					temp->c3->usr2 = x;
-				}
-			}
-			else//leafno3 has no space
-			{
-				if(x->perm < temp->c3->usr1->perm)
-				{
-					Node *r = createNewNode();
-					r->usr1 = x;
-					r->parent = temp;
-					temp->c ++;
-					temp->c4 = temp->c3;
-					temp->c3 = r;
-				}
-				else if (x->perm > temp->c3->usr1->perm)
-				{
-					Node *r = createNewNode();
-					r->usr1 = x;
-					r->parent = temp;
-					temp->c ++;
-					temp->c4 = r;
-				}
-				else
-				{
-					Node *r = createNewNode();
-					r->usr1 = temp->c3->usr2;
-					temp->c3->usr2 = x;
-					r->parent = temp;
-					temp->c ++;
-					temp->c4 = r;
-				}
-				temp->k[0] = getMin(temp->c2);
-				temp->k[1] = getMin(temp->c3);
-				temp->k[2] = getMin(temp->c4);
-				return;
-			}
-		}	
-		else 
-		{
-			split(temp);
-			insertBTree(x);
-		}
-	}
+	
 }
 
 bool isFull(Node * n)
@@ -666,6 +419,7 @@ void split(Node * n)
 		c->parent = NULL;
 		c->c1 = n;
 		c->c2 = a;
+		root = c;
 
 		a->k[0] = getMin(a->c2);
 		a->k[1] = 10000;
