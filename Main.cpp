@@ -121,14 +121,14 @@ void dfsutil(int p, bool *visited){
 
 vector<int> dfshelper(int perm, Node *leafNode, bool *visited){
   vector<int> temp;
-  if(leafNode->usr1->perm == perm){
+  if(leafNode->usr1 != NULL && leafNode->usr1->perm == perm){
     for(int i = 0; i < graph[perm].size(); i++){
       find(perm, leafNode);
       temp.push_back(graph[perm][i]);
     }
     return temp;
   }
-  else if(leafNode->usr2->perm == perm){
+  else if(leafNode->usr2 != NULL && leafNode->usr2->perm == perm){
     for(int i = 0; i < graph[perm].size();i++){
       find(perm,leafNode);
       temp.push_back(graph[perm][i]);
@@ -195,7 +195,7 @@ void findDetails(int perm, Node *p){
   if(p != NULL){
     if(p->leaf == true){
       if(perm == p->usr1->perm){
-	cout << "Perm: " << p->usr1->perm << " Name: " << p->usr1->name << "Genre1: " << p->usr1->genre1 << " Genre2: " << p->usr1->genre2 << "Friends: ";
+	cout << "Perm: " << p->usr1->perm << " Name: " << p->usr1->name << " Genre1: " << p->usr1->genre1 << " Genre2: " << p->usr1->genre2 << " Friends: ";
 	found = true;
 	for(int i = 0;i < graph.size(); i++){
 	  if(graph[i][0]==perm){
@@ -207,7 +207,7 @@ void findDetails(int perm, Node *p){
 	cout << endl;
       }
       else if(p->usr2 != NULL && perm == p->usr2->perm){
-	cout << "Perm: " << p->usr2->perm << " Name: " << p->usr2->name << "Genre1: " << p->usr2->genre1 << " Genre2: " << p->usr2->genre2 << "Friends:";
+	cout << "Perm: " << p->usr2->perm << " Name: " << p->usr2->name << " Genre1: " << p->usr2->genre1 << " Genre2: " << p->usr2->genre2 << " Friends:";
 	found = true;
 	for(int i = 0;i < graph.size(); i++){
 	  if(graph[i][0]==perm){
@@ -688,28 +688,35 @@ int main(){
 					//add user
 					cout << "Enter perm: ";
 					cin >> perm;
-					fullstr += perm;
+					string perm1 = to_string(perm);
+					fullstr = perm1;
 					fullstr += ";";
 						cout << "Enter name: ";
 					cin >> name;
 					fullstr += name;
 					fullstr += ";";
 					cout << "Enter genre 1: ";
+					name = "";
 					cin >> name;
 					fullstr += name;
 					fullstr += ";";
 					cout << "Enter genre 2: ";
+					name = "";
 					cin >> name;
 					fullstr += name;
 					fullstr += ";";
 					do{
-						cout << "Enter friend perm (stop to stop): ";
-						cin >> name;
-						if(name!="stop"){
-							fullstr+=name;
-							fullstr+=";";
+						cout << "Enter friend perm (-1 to stop): ";
+						cin>>perm;
+						if(perm>=0){
+						string perm2 = to_string(perm);
+						fullstr+=perm2;
+						fullstr+=";";
 						}
-					}while(name != "stop");
+
+					}
+					while(perm>=0);
+					fullstr.pop_back();
 					insertion(fullstr);
 					break;
 					}
