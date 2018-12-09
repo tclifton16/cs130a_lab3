@@ -43,6 +43,7 @@ void dfsutil(int p, bool *visited);
 vector<int> dfshelper(int perm, Node *leafNode, bool *visited);
 
 Node *root = NULL, *newNode = NULL, *tempNode = NULL;
+int graphSize = 0;
 vector<vector<int> > graph;
 Entry tempEntry;
 bool found = false;
@@ -139,11 +140,11 @@ vector<int> dfshelper(int perm, Node *leafNode, bool *visited){
 }
 
 void insertion(string fullstr){
-	User *user = new User;
 	
+	User *user = new User;
 
-	int index,numFriends,count=4;
-	string temp;
+	int index, numFriends, count=4;
+	string temp = "";
 	vector<string> vec;
 	vector<int> numvec;
 	stringstream ss(fullstr);
@@ -161,6 +162,9 @@ void insertion(string fullstr){
 	user->genre1=vec[2];
 	user->genre2=vec[3];
 
+	cout<<graph.size()<<"THis is graph size"<<endl;
+	cout<<vec.size()<<"this is vec size"<<endl;
+
 	index = graph.size();
 	numvec.push_back(tempb);
 	while(count < vec.size()){
@@ -171,61 +175,151 @@ void insertion(string fullstr){
 	insertBTree(user);
 }
 
-void find(int perm, Node *p){
-	if(p != NULL){
-	  
-	  if(p->leaf==true){
-	    if(perm == p->usr1->perm || p->usr2 != NULL && perm == p->usr2->perm){
-	      cout << "Perm: " << perm << " exists in B Tree\n";
-	      found = true;
-	    }
-	  }
-	  else if(p->leaf == false){
-	    find(perm, p->c1);
-	    find(perm, p->c2);
-	    find(perm, p->c3);
-	    find(perm, p->c4);
-	  }
+void find(int perm, Node *p){//node is root on first iteration
+	if(root == NULL)
+	{
+		cout<<"There are no users"<<endl;
+		return;
 	}
+	if(p == NULL)
+	{
+		found = false;
+		return;
+	}
+
+	if(p->leaf)
+	{
+		if(p->usr1->perm == perm)
+		{
+			cout<<"User found!"<<endl;
+			found = true;
+			return;
+		}
+		else if(p->usr2 != NULL && p->usr2-> perm == perm)
+		{
+			cout<<"User found!"<<endl;
+			found = true;
+			return;
+		}
+		else
+			return;
+
+	}
+	if(perm < p->k[0])
+		find(perm, p->c1);
+
+	if(perm >= p->k[0])
+	{
+		if(p->k[1] > 9999)
+			find(perm, p->c2);
+		
+		else 
+		{
+			if(perm < p->k[1])
+				find (perm, p->c2);
+
+			if(perm >= p->k[1])
+			{
+				if(p->k[2] > 9999)
+					find(perm, p->c3);
+				
+				else
+				{
+					if(perm < p->k[2])
+						find(perm, p->c3);
+					else
+						find(perm, p->c4);
+				}
+			}
+		}
+	}
+
+
+
+	
 }
 
 
 
 void findDetails(int perm, Node *p){
-  if(p != NULL){
-    if(p->leaf == true){
-      if(perm == p->usr1->perm){
-	cout << "Perm: " << p->usr1->perm << " Name: " << p->usr1->name << " Genre1: " << p->usr1->genre1 << " Genre2: " << p->usr1->genre2 << " Friends: ";
-	found = true;
-	for(int i = 0;i < graph.size(); i++){
-	  if(graph[i][0]==perm){
-	    for(int x = 1; x < graph[i].size(); x++){
-	      cout << " " << graph[i][x];
-	    }
-	  }
-	}
-	cout << endl;
-      }
-      else if(p->usr2 != NULL && perm == p->usr2->perm){
-	cout << "Perm: " << p->usr2->perm << " Name: " << p->usr2->name << " Genre1: " << p->usr2->genre1 << " Genre2: " << p->usr2->genre2 << " Friends:";
-	found = true;
-	for(int i = 0;i < graph.size(); i++){
-	  if(graph[i][0]==perm){
-	    for(int x = 1; x < graph[i].size(); x++){
-	      cout << " " << graph[i][x];
-	    }
-	  }
-	}
-	cout << endl;
-      }
-    }
-    else if(p->leaf == false){
-      findDetails(perm,p->c1);
-      findDetails(perm,p->c2);
-      findDetails(perm,p->c3);
-      findDetails(perm,p->c4);
-    }
-  }
+	if(root == NULL)
+         {
+                 cout<<"There are no users"<<endl;
+                 return;
+         }
+         if(p == NULL)
+         {
+                 found = false;
+                 return;
+         }
+
+         if(p->leaf)
+         {
+                 if(p->usr1->perm == perm)
+                 {
+                         cout<<"User found!"<<endl;
+			 cout<<"Perm Number: "<<perm<<"\nUser Name: "<<p->usr1->name<<"\nGenre 1: "<<p->usr1->genre1<<"\nGenre 2: "<<p->usr1->genre2<<"\nPerm Numbers of Friends:\n";
+			 for(int i = 0; i<graph.size(); i++)
+			 {
+				 if(graph[i][0] == perm)
+				 {
+					 for( int j=1; j<graph[i].size(); j++)
+						 cout<<"\n"<<graph[i][j];
+				}
+			 }
+                         found = true;
+                         return;
+                 }
+                 else if(p->usr2 != NULL && p->usr2-> perm == perm)
+                 {
+                         cout<<"User found!"<<endl;
+			  cout<<"Perm Number: "<<perm<<"\nUser Name: "<<p->usr2->name<<"\nGenre 1: "<<p->usr2->genre1<<"\nGenre 2: "<<p->usr2->genre2<<"\nPerm Numbers of Friends:\n";
+                          for(int i = 0; i<graph.size(); i++)
+                          {
+                                  if(graph[i][0] == perm)
+                                  {
+                                          for( int j=1; j<graph[i].size(); j++)
+                                                  cout<<"\n"<<graph[i][j];
+                                  }
+                          }
+
+                         found = true;
+                         return;
+		 }
+                 else
+                         return;
+
+         }
+         if(perm < p->k[0])
+                 find(perm, p->c1);
+
+         if(perm >= p->k[0])
+         {
+                 if(p->k[1] > 9999)
+                         find(perm, p->c2);
+
+                 else
+                 {
+                         if(perm < p->k[1])
+                                 find (perm, p->c2);
+
+                         if(perm >= p->k[1])
+                         {
+                                 if(p->k[2] > 9999)
+                                         find(perm, p->c3);
+
+                                 else
+                                 {
+                                         if(perm < p->k[2])
+                                                 find(perm, p->c3);
+                                         else
+                                                 find(perm, p->c4);
+                                 }
+                         }
+                 }
+         }
+
+
 }
 
 int getMin(Node *n){
